@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precision Oncology Model</title>
+  <style>
+    :root {
+      --bg: #f4f7f5;
+      --surface: #ffffff;
+      --ink: #17231e;
+      --muted: #66736c;
+      --line: #dce5df;
+      --accent: #167d62;
+      --accent-dark: #105541;
+      --soft: #e7f3ee;
+      --danger: #a33b3b;
+      --shadow: 0 16px 45px rgba(25, 60, 45, .08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 Georgia, 'Times New Roman', serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1160px, calc(100% - 32px)); margin: 0 auto; }
+    .topbar { padding: 24px 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .brand { display: flex; gap: 12px; align-items: center; }
+    .mark { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--accent); color: white; font-weight: bold; font-family: Arial, sans-serif; }
+    .brand strong { display: block; font-size: 17px; }
+    .brand span { color: var(--muted); font-size: 12px; }
+    .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #b6c1ba; }
+    .dot.ready { background: #2f9f72; }
+    .hero { padding: 34px 0 28px; max-width: 720px; }
+    .app-hero { max-width: 920px; }
+    .app-hero .row { align-items: flex-start; }
+    .app-hero .row > div { min-width: 0; }
+    .app-hero .btn { flex: 0 0 auto; white-space: nowrap; }
+    .eyebrow { color: var(--accent); text-transform: uppercase; letter-spacing: .12em; font: 700 11px Arial, sans-serif; }
+    h1 { margin: 8px 0 12px; font-size: clamp(34px, 6vw, 64px); line-height: .98; letter-spacing: -.03em; font-weight: 500; }
+    h2 { margin: 0 0 5px; font-size: 24px; font-weight: 500; }
+    h3 { margin: 0 0 12px; font-size: 17px; }
+    .hero p { color: var(--muted); max-width: 620px; font-size: 17px; }
+    .auth { width: min(470px, 100%); margin: 28px auto 70px; }
+    .tabs { display: flex; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+    .tab { border: 0; background: transparent; color: var(--muted); padding: 10px 16px; }
+    .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); font-weight: bold; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; padding-bottom: 50px; }
+    .span-4 { grid-column: span 4; } .span-5 { grid-column: span 5; } .span-7 { grid-column: span 7; } .span-8 { grid-column: span 8; } .span-12 { grid-column: span 12; }
+    label { display: block; color: var(--muted); font: 12px Arial, sans-serif; margin: 14px 0 6px; }
+    input, select { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; background: #fbfdfc; color: var(--ink); outline: none; }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--soft); }
+    .btn { border: 0; border-radius: 9px; padding: 11px 16px; font-weight: bold; }
+    .primary { background: var(--accent); color: white; }
+    .primary:hover { background: var(--accent-dark); }
+    .secondary { background: var(--soft); color: var(--accent-dark); }
+    .muted { color: var(--muted); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    .message { min-height: 22px; margin-top: 12px; color: var(--danger); font: 13px Arial, sans-serif; }
+    .hidden { display: none !important; }
+    .metric { background: var(--soft); border-radius: 12px; padding: 15px; }
+    .metric b { display: block; margin-top: 4px; font-size: 18px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+    .result { border-left: 4px solid var(--accent); background: #f8fcfa; padding: 17px; border-radius: 8px; }
+    .result strong { font-size: 22px; font-weight: 500; }
+    .result p { margin: 8px 0 0; color: var(--muted); }
+    .bars { display: grid; gap: 11px; }
+    .bar-row { display: grid; grid-template-columns: 135px 1fr 64px; gap: 10px; align-items: center; font: 13px Arial, sans-serif; }
+    .bar-track { height: 8px; border-radius: 20px; background: #e6ede9; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: inherit; }
+    .viz-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; margin-top: 18px; }
+    .viz-panel { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: #fbfdfc; min-width: 0; }
+    .viz-panel h3 { margin-bottom: 4px; }
+    .viz-panel p { margin: 0 0 10px; font: 12px Arial, sans-serif; color: var(--muted); }
+    .viz-panel svg { width: 100%; height: 230px; display: block; overflow: visible; }
+    .graph-edge { stroke: #b7c9c0; stroke-width: 1.5; }
+    .graph-edge-label { fill: #789087; font: 9px Arial, sans-serif; }
+    .graph-node { stroke: white; stroke-width: 2; }
+    .graph-node.gene { fill: #167d62; }
+    .graph-node.gene.mutated { fill: #c77b30; }
+    .graph-node.gene.druggable { fill: #9a557d; }
+    .graph-node.gene.selected { fill: #167d62; stroke: #17231e; stroke-width: 3; }
+    .graph-node.chromosome { fill: #4d7ea8; }
+    .graph-node.mutation { fill: #c77b30; }
+    .graph-node.neighbor { fill: #9bafa5; }
+    .graph-node.drug { fill: #9a557d; }
+    .graph-label { fill: var(--ink); font: 11px Arial, sans-serif; text-anchor: middle; }
+    .graph-label.small { font-size: 9px; }
+    .graph-section-label { fill: #66736c; font: 700 10px Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+    .gene-atlas-bg { fill: #f4f8f6; stroke: #dce5df; stroke-width: 1; }
+    .kde-area { fill: rgba(22, 125, 98, .14); }
+    .kde-line { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+    .kde-marker { stroke: #c24d3d; stroke-width: 2; stroke-dasharray: 4 3; }
+    .kde-gridline { stroke: #dce5df; stroke-width: 1; stroke-dasharray: 3 4; }
+    .kde-axis { stroke: #8fa39a; stroke-width: 1; }
+    .kde-label { fill: #66736c; font: 10px Arial, sans-serif; }
+    .kde-label.strong { fill: #c24d3d; font-weight: bold; }
+    .kde-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 7px; font: 12px Arial, sans-serif; color: var(--muted); }
+    .kde-key { display: inline-flex; align-items: center; gap: 5px; }
+    .kde-key-line { width: 18px; border-top: 3px solid var(--accent); }
+    .kde-key-marker { width: 18px; border-top: 2px dashed #c24d3d; }
+    .viz-stat { font: 12px Arial, sans-serif; color: var(--muted); }
+    .graph-legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; font: 11px Arial, sans-serif; color: var(--muted); }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .gene-landscape { max-height: 180px; overflow: auto; margin-top: 12px; }
+    .gene-landscape table { font-size: 12px; }
+    .status-yes { color: var(--accent-dark); font-weight: bold; }
+    .status-no { color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    .flow-section { margin-bottom: 50px; }
+    .flow-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+    .flow-step { position: relative; min-height: 142px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fbfdfc; }
+    .flow-step:not(:last-child)::after { content: '->'; position: absolute; right: -19px; top: 52px; z-index: 1; color: var(--accent); font: 700 22px Arial, sans-serif; }
+    .flow-number { display: inline-grid; place-items: center; width: 25px; height: 25px; border-radius: 50%; background: var(--accent); color: white; font: 700 12px Arial, sans-serif; }
+    .flow-step h3 { margin: 12px 0 5px; font-size: 15px; }
+    .flow-step p { margin: 0; color: var(--muted); font: 12px/1.45 Arial, sans-serif; }
+    .flow-branch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    .flow-outcome { padding: 13px 16px; border-left: 3px solid var(--accent); background: var(--soft); border-radius: 8px; }
+    .flow-outcome strong { display: block; margin-bottom: 3px; font-size: 14px; }
+    .flow-outcome span { color: var(--muted); font: 12px/1.4 Arial, sans-serif; }
+    table { width: 100%; border-collapse: collapse; font: 13px Arial, sans-serif; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+    footer { padding: 0 0 30px; color: var(--muted); font: 12px Arial, sans-serif; }
+    @media (max-width: 800px) { .span-4, .span-5, .span-7, .span-8 { grid-column: span 12; } .topbar { align-items: flex-start; flex-direction: column; } .metrics { grid-template-columns: 1fr; } .bar-row { grid-template-columns: 105px 1fr 55px; } .viz-grid { grid-template-columns: 1fr; } .flow-track { grid-template-columns: 1fr; } .flow-step:not(:last-child)::after { content: 'v'; right: auto; top: auto; bottom: -22px; left: calc(50% - 4px); } .flow-branch { grid-template-columns: 1fr; } .app-hero .row { flex-direction: column; align-items: stretch; } .app-hero .btn { align-self: flex-start; } }
+  </style>
+</head>
+<body>
+  <header class="shell topbar">
+    <div class="brand"><div class="mark">PO</div><div><strong>Precision Oncology</strong><span>Variant caller and therapy recommender</span></div></div>
+    <div class="status"><label for="languageSelect" class="hidden">Language</label><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="mr">मराठी</option><option value="gu">ગુજરાતી</option></select><span id="healthDot" class="dot"></span><span id="healthText">Checking model service...</span></div>
+  </header>
+
+  <main class="shell">
+    <section id="authView" class="auth">
+      <div class="hero"><div class="eyebrow" data-i18n="clinicalSupport">Clinical decision support</div><h1 data-i18n="heroTitle">Make the next variant easier to understand.</h1><p data-i18n="heroDescription">Use the trained oncology model to classify a genomic variant and surface the strongest drug matches.</p></div>
+      <div class="card">
+        <div class="tabs"><button id="loginTab" class="tab active" data-i18n="signIn">Sign in</button><button id="registerTab" class="tab" data-i18n="createAccount">Create account</button></div>
+        <form id="loginForm" novalidate>
+          <label for="loginIdentifier" data-i18n="emailOrMobile">Email or mobile</label><input id="loginIdentifier" required autocomplete="username">
+          <label for="loginPassword" data-i18n="password">Password</label><input id="loginPassword" type="password" required autocomplete="current-password">
+          <div class="actions"><button class="btn primary" type="submit" data-i18n="signIn">Sign in</button></div>
+        </form>
+        <form id="registerForm" class="hidden" novalidate>
+          <label for="registerName">Full name</label><input id="registerName" required minlength="2">
+          <label for="registerEmail">Email</label><input id="registerEmail" type="email">
+          <label for="registerMobile">Mobile</label><input id="registerMobile">
+          <label for="registerRole">Role</label><select id="registerRole"><option value="patient">Patient</option><option value="doctor">Doctor</option></select>
+          <label for="registerPassword">Password</label><input id="registerPassword" type="password" minlength="6" required>
+          <div class="actions"><button class="btn primary" type="submit" data-i18n="createAccount">Create account</button></div>
+        </form>
+        <div id="authMessage" class="message"></div>
+      </div>
+    </section>
+
+    <section id="appView" class="hidden">
+      <div class="hero app-hero"><div class="eyebrow" data-i18n="modelWorkspace">Model workspace</div><div class="row"><div><h1 data-i18n="variantReview">Variant review</h1><p data-i18n="variantDescription">Choose a record from the trained dataset, run a prediction, and review the recommended treatments.</p></div><button id="logoutButton" class="btn secondary" data-i18n="signOut">Sign out</button></div></div>
+      <div class="grid">
+        <section class="card span-5">
+          <h2 data-i18n="variantInput">Variant input</h2><p class="muted" data-i18n="variantInputDescription">All fields are sent directly to the prediction API.</p>
+          <form id="predictForm">
+            <label for="age" data-i18n="patientAge">Patient age</label><input id="age" type="number" min="0" value="54" required>
+            <label for="gene" data-i18n="gene">Gene</label><select id="gene" required></select>
+            <label for="chromosome" data-i18n="chromosome">Chromosome</label><select id="chromosome" required></select>
+            <label for="exon" data-i18n="transcriptExon">Transcript exon</label><select id="exon" required></select>
+            <label for="position" data-i18n="transcriptPosition">Transcript position</label><select id="position" required></select>
+            <div class="actions"><button class="btn primary" type="submit" data-i18n="runPrediction">Run prediction</button><button id="loadOptions" class="btn secondary" type="button" data-i18n="refreshDataset">Refresh dataset</button></div>
+          </form>
+          <div id="predictMessage" class="message"></div>
+        </section>
+        <section class="card span-7">
+          <div class="row"><div><h2 data-i18n="predictionResult">Prediction result</h2><p class="muted" data-i18n="predictionDescription">The result appears here after a model run.</p></div><span id="resultBadge" class="muted"></span></div>
+          <div id="emptyResult" class="result" style="margin-top:18px" data-i18n="noPrediction">No prediction yet. Select a variant and run the model.</div>
+          <div id="predictionResult" class="hidden">
+            <div class="metrics"><div class="metric"><span class="muted" data-i18n="classification">Classification</span><b id="classification">-</b></div><div class="metric"><span class="muted" data-i18n="confidence">Confidence</span><b id="confidence">-</b></div><div class="metric"><span class="muted" data-i18n="recommendedDrug">Recommended drug</span><b id="recommendedDrug">-</b></div></div>
+            <div class="result" style="margin-top:16px"><strong id="actionText">-</strong><p id="drugProbability"></p><p id="actionDetail"></p></div>
+            <div style="margin-top:24px"><h3>SHAP feature impacts</h3><p class="muted">TreeSHAP contribution to this mutation classification.</p><div id="featureBars" class="bars"></div></div>
+            <div style="margin-top:24px"><h3 data-i18n="treatmentComparison">Treatment comparison</h3><p class="muted" data-i18n="westernPricing">Western India estimate per treatment cycle, including GST.</p><div id="alternatives" class="table-wrap"></div></div>
+          </div>
+        </section>
+        <section class="card span-12" id="modelVisualization">
+          <div class="row"><div><h2 data-i18n="evidenceMap">Mutation evidence map</h2><p class="muted" data-i18n="evidenceDescription">Dynamic views recomputed from the selected gene, chromosome, exon, and transcript position.</p></div><span id="vizBadge" class="muted" data-i18n="awaitingPrediction">Awaiting prediction</span></div>
+          <div class="viz-grid">
+            <div class="viz-panel"><h3>GNN-style mutation graph</h3><p>Drag nodes to inspect every dataset gene, mutated genes, and druggable genes.</p><svg id="graphSvg" viewBox="0 0 700 300" role="img" aria-label="Mutation relationship graph"></svg><div class="graph-legend"><span class="legend-item"><span class="legend-dot graph-node gene selected"></span>searched gene</span><span class="legend-item"><span class="legend-dot graph-node gene mutated"></span>mutated gene</span><span class="legend-item"><span class="legend-dot graph-node gene druggable"></span>druggable gene</span><span class="legend-item"><span class="legend-dot graph-node mutation"></span>searched mutation</span><span class="legend-item"><span class="legend-dot graph-node drug"></span>matched drug</span></div><div id="graphSummary" class="viz-stat"></div><div id="geneLandscape" class="gene-landscape"></div></div>
+            <div class="viz-panel"><h3>Gene mutation KDE</h3><p>Density of transcript positions observed for the searched gene.</p><svg id="kdeSvg" viewBox="0 0 520 230" role="img" aria-label="Kernel density estimate"></svg><div class="kde-meta"><span class="kde-key"><span class="kde-key-line"></span>mutation density</span><span class="kde-key"><span class="kde-key-marker"></span>searched position</span></div><div id="kdeSummary" class="viz-stat"></div></div>
+          </div>
+        </section>
+        <section class="card span-12"><div class="row"><div><h2>Service overview</h2><p class="muted">Live status from the FastAPI service and loaded artifacts.</p></div><button id="refreshHealth" class="btn secondary">Refresh status</button></div><div id="healthDetails" class="metrics"></div></section>
+        <section class="card span-12 flow-section">
+          <div><h2>How the model works</h2><p class="muted">The live path from account access to an explainable treatment recommendation.</p></div>
+          <div class="flow-track">
+            <article class="flow-step"><span class="flow-number">1</span><h3>Access and readiness</h3><p>FastAPI loads users, model files, encoders, and the genomic dataset. You sign in to receive a session token.</p></article>
+            <article class="flow-step"><span class="flow-number">2</span><h3>Variant input</h3><p>Select a gene, chromosome, exon, and transcript position from the available dataset options.</p></article>
+            <article class="flow-step"><span class="flow-number">3</span><h3>XGBoost classification</h3><p>The API normalizes the position, encodes categorical values, and predicts the cancer probability.</p></article>
+            <article class="flow-step"><span class="flow-number">4</span><h3>Clinical evidence</h3><p>The response includes confidence, feature impacts, a mutation graph, and gene-position density.</p></article>
+          </div>
+          <div class="flow-branch">
+            <div class="flow-outcome"><strong>Cancerous probability &gt;= 50%</strong><span>Random Forest ranks drugs, then the page shows the top recommendation, alternatives, and estimated treatment costs with GST.</span></div>
+            <div class="flow-outcome"><strong>Cancerous probability &lt; 50%</strong><span>The result is marked benign or normal, no targeted drug is recommended, and monitoring is suggested.</span></div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <footer class="shell">For research and demonstration use. Confirm results with qualified clinical and genomic review.</footer>
+
+  <script>
+    const API = 'http://127.0.0.1:8000';
+    const $ = (id) => document.getElementById(id);
+    let variantOptions = null;
+    let currentLanguage = localStorage.getItem('cdss_language') || 'en';
+    const translations = {
+      en: { clinicalSupport:'Clinical decision support', heroTitle:'Make the next variant easier to understand.', heroDescription:'Use the trained oncology model to classify a genomic variant and surface the strongest drug matches.', signIn:'Sign in', createAccount:'Create account', emailOrMobile:'Email or mobile', password:'Password', modelWorkspace:'Model workspace', variantReview:'Variant review', variantDescription:'Choose a record from the trained dataset, run a prediction, and review the recommended treatments.', signOut:'Sign out', variantInput:'Variant input', variantInputDescription:'All fields are sent directly to the prediction API.', patientAge:'Patient age', gene:'Gene', chromosome:'Chromosome', transcriptExon:'Transcript exon', transcriptPosition:'Transcript position', runPrediction:'Run prediction', refreshDataset:'Refresh dataset', predictionResult:'Prediction result', predictionDescription:'The result appears here after a model run.', noPrediction:'No prediction yet. Select a variant and run the model.', classification:'Classification', confidence:'Confidence', recommendedDrug:'Recommended drug', evidenceMap:'Mutation evidence map', evidenceDescription:'Dynamic views recomputed from the selected gene, chromosome, exon, and transcript position.', awaitingPrediction:'Awaiting prediction', treatmentComparison:'Treatment comparison', westernPricing:'Western India estimate per treatment cycle, including GST.' },
+      hi: { clinicalSupport:'क्लिनिकल निर्णय सहायता', heroTitle:'अगले वैरिएंट को समझना आसान बनाएं।', heroDescription:'जीनोमिक वैरिएंट का वर्गीकरण करें और बेहतर दवा विकल्प देखें।', signIn:'साइन इन', createAccount:'खाता बनाएं', emailOrMobile:'ईमेल या मोबाइल', password:'पासवर्ड', modelWorkspace:'मॉडल कार्यक्षेत्र', variantReview:'वैरिएंट समीक्षा', variantDescription:'डेटासेट से रिकॉर्ड चुनें, भविष्यवाणी चलाएं और सुझाए गए उपचार देखें।', signOut:'साइन आउट', variantInput:'वैरिएंट इनपुट', variantInputDescription:'सभी फ़ील्ड सीधे भविष्यवाणी API को भेजे जाते हैं।', patientAge:'रोगी की आयु', gene:'जीन', chromosome:'क्रोमोसोम', transcriptExon:'ट्रांसक्रिप्ट एक्सॉन', transcriptPosition:'ट्रांसक्रिप्ट स्थिति', runPrediction:'भविष्यवाणी चलाएं', refreshDataset:'डेटासेट रीफ्रेश करें', predictionResult:'भविष्यवाणी परिणाम', predictionDescription:'मॉडल चलने के बाद परिणाम यहां दिखाई देगा।', noPrediction:'अभी कोई भविष्यवाणी नहीं। वैरिएंट चुनें और मॉडल चलाएं।', classification:'वर्गीकरण', confidence:'विश्वास', recommendedDrug:'सुझाई गई दवा', evidenceMap:'म्यूटेशन प्रमाण मानचित्र', evidenceDescription:'चयनित जीन, क्रोमोसोम, एक्सॉन और स्थिति से दृश्य अपडेट होते हैं।', awaitingPrediction:'भविष्यवाणी की प्रतीक्षा', treatmentComparison:'उपचार तुलना', westernPricing:'पश्चिमी भारत का प्रति उपचार चक्र अनुमान, GST सहित।' },
+      mr: { clinicalSupport:'क्लिनिकल निर्णय सहाय्य', heroTitle:'पुढील व्हेरिएंट समजणे सोपे करा.', heroDescription:'जीनोमिक व्हेरिएंटचे वर्गीकरण करा आणि योग्य औषध पर्याय पहा.', signIn:'साइन इन', createAccount:'खाते तयार करा', emailOrMobile:'ईमेल किंवा मोबाइल', password:'पासवर्ड', modelWorkspace:'मॉडेल कार्यक्षेत्र', variantReview:'व्हेरिएंट समीक्षा', variantDescription:'डेटासेटमधून रेकॉर्ड निवडा, अंदाज चालवा आणि सुचविलेले उपचार पहा.', signOut:'साइन आउट', variantInput:'व्हेरिएंट इनपुट', variantInputDescription:'सर्व फील्ड थेट अंदाज API कडे पाठवले जातात.', patientAge:'रुग्णाचे वय', gene:'जीन', chromosome:'क्रोमोसोम', transcriptExon:'ट्रान्सक्रिप्ट एक्सॉन', transcriptPosition:'ट्रान्सक्रिप्ट स्थिती', runPrediction:'अंदाज चालवा', refreshDataset:'डेटासेट रिफ्रेश करा', predictionResult:'अंदाजाचा निकाल', predictionDescription:'मॉडेल चालल्यानंतर निकाल येथे दिसेल.', noPrediction:'अजून अंदाज नाही. व्हेरिएंट निवडा आणि मॉडेल चालवा.', classification:'वर्गीकरण', confidence:'विश्वास', recommendedDrug:'सुचविलेले औषध', evidenceMap:'म्युटेशन पुरावा नकाशा', evidenceDescription:'निवडलेल्या जीन, क्रोमोसोम, एक्सॉन आणि स्थितीनुसार दृश्ये अपडेट होतात.', awaitingPrediction:'अंदाजाची प्रतीक्षा', treatmentComparison:'उपचार तुलना', westernPricing:'पश्चिम भारतातील प्रति उपचार चक्र अंदाज, GST सहित.' },
+      gu: { clinicalSupport:'ક્લિનિકલ નિર્ણય સહાય', heroTitle:'આગળના વેરિઅન્ટને સમજવું સરળ બનાવો.', heroDescription:'જિનોમિક વેરિઅન્ટનું વર્ગીકરણ કરો અને યોગ્ય દવા વિકલ્પો જુઓ.', signIn:'સાઇન ઇન', createAccount:'ખાતું બનાવો', emailOrMobile:'ઇમેઇલ અથવા મોબાઇલ', password:'પાસવર્ડ', modelWorkspace:'મોડેલ કાર્યક્ષેત્ર', variantReview:'વેરિઅન્ટ સમીક્ષા', variantDescription:'ડેટાસેટમાંથી રેકોર્ડ પસંદ કરો, આગાહી ચલાવો અને સૂચિત સારવાર જુઓ.', signOut:'સાઇન આઉટ', variantInput:'વેરિઅન્ટ ઇનપુટ', variantInputDescription:'બધા ક્ષેત્રો સીધા આગાહી API ને મોકલવામાં આવે છે.', patientAge:'દર્દીની ઉંમર', gene:'જીન', chromosome:'ક્રોમોઝોમ', transcriptExon:'ટ્રાન્સક્રિપ્ટ એક્સોન', transcriptPosition:'ટ્રાન્સક્રિપ્ટ સ્થિતિ', runPrediction:'આગાહી ચલાવો', refreshDataset:'ડેટાસેટ રિફ્રેશ કરો', predictionResult:'આગાહી પરિણામ', predictionDescription:'મોડેલ ચાલ્યા પછી પરિણામ અહીં દેખાશે.', noPrediction:'હજુ આગાહી નથી. વેરિઅન્ટ પસંદ કરો અને મોડેલ ચલાવો.', classification:'વર્ગીકરણ', confidence:'વિશ્વાસ', recommendedDrug:'ભલામણ કરેલી દવા', evidenceMap:'મ્યુટેશન પુરાવા નકશો', evidenceDescription:'પસંદ કરેલા જીન, ક્રોમોઝોમ, એક્સોન અને સ્થિતિથી દૃશ્યો અપડેટ થાય છે.', awaitingPrediction:'આગાહીની રાહ', treatmentComparison:'સારવાર સરખામણી', westernPricing:'પશ્ચિમ ભારત માટે પ્રતિ સારવાર ચક્રનો અંદાજ, GST સહિત.' }
+    };
+
+    function applyLanguage(language) {
+      currentLanguage = translations[language] ? language : 'en';
+      $('languageSelect').value = currentLanguage;
+      document.querySelectorAll('[data-i18n]').forEach(element => { element.textContent = translations[currentLanguage][element.dataset.i18n]; });
+      localStorage.setItem('cdss_language', currentLanguage);
+    }
+
+    function formatApiError(data, fallback = 'Request failed') {
+      if (Array.isArray(data.detail)) return data.detail.map(item => item.msg || 'Invalid input').join(' ');
+      return data.detail || data.message || fallback;
+    }
+    async function request(path, options = {}) {
+      let response;
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        try {
+          response = await fetch(API + path, { headers: {'Content-Type': 'application/json', ...(options.headers || {})}, ...options });
+          break;
+        } catch (error) {
+          if (attempt === 7) throw new Error('FastAPI is not ready. Close this page and open start_app.bat to start the service and sign-in page.');
+          await new Promise(resolve => setTimeout(resolve, 750));
+        }
+      }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(formatApiError(data));
+      return data;
+    }
+
+    function showAuthMessage(text = '') { $('authMessage').textContent = text; }
+    function showPredictMessage(text = '') { $('predictMessage').textContent = text; }
+    function showAuthTab(tab) {
+      const login = tab === 'login'; $('loginForm').classList.toggle('hidden', !login); $('registerForm').classList.toggle('hidden', login);
+      $('loginTab').classList.toggle('active', login); $('registerTab').classList.toggle('active', !login); showAuthMessage('');
+    }
+    function setSelect(id, values) {
+      $(id).innerHTML = values.map(value => `<option value="${String(value).replaceAll('"', '&quot;')}">${value}</option>`).join('');
+    }
+    function fillOptions(data) {
+      variantOptions = data;
+      setSelect('gene', data.genes); setSelect('chromosome', data.chromosomes); setSelect('exon', data.exons); setSelect('position', data.positions);
+    }
+    async function loadVariantOptions() { try { fillOptions(await request('/variant-options')); showPredictMessage(''); } catch (error) { showPredictMessage(error.message); } }
+    async function refreshHealth() {
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        try {
+          const data = await request('/health');
+          $('healthDot').classList.toggle('ready', data.models_loaded); $('healthText').textContent = data.models_loaded ? 'Model service ready' : 'Model artifacts unavailable';
+          $('healthDetails').innerHTML = `<div class="metric"><span class="muted">Models loaded</span><b>${data.models_loaded ? 'Yes' : 'No'}</b></div><div class="metric"><span class="muted">Dataset rows</span><b>${data.dataset_rows}</b></div><div class="metric"><span class="muted">Modules</span><b>${Object.values(data.modules).filter(Boolean).length}/${Object.keys(data.modules).length}</b></div>`;
+          return;
+        } catch (error) {
+          if (attempt === 11) { $('healthText').textContent = 'Model service offline'; $('healthDetails').innerHTML = `<div class="result">${error.message}. Start the FastAPI backend on port 8000.</div>`; return; }
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+      }
+    }
+    function escapeHtml(value) { return String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character])); }
+    function renderGraph(graph) {
+      const svg = $('graphSvg');
+      const positions = {gene:[100,105], chromosome:[270,105], mutation:[455,55]};
+      graph.nodes.filter(node => node.type === 'gene' && node.id !== 'gene').forEach((node, index) => { positions[node.id] = [48 + (index % 5) * 118, 245 - Math.floor(index / 5) * 33]; });
+      graph.nodes.filter(node => node.type === 'neighbor').forEach((node, index) => { positions[node.id] = [365 + (index % 2) * 100, 25 + Math.floor(index / 2) * 42]; });
+      graph.nodes.filter(node => node.type === 'drug').forEach((node, index) => { positions[node.id] = [560 + (index % 2) * 85, 82 + Math.floor(index / 2) * 48]; });
+      graph.nodes.forEach((node, index) => { if (!positions[node.id]) positions[node.id] = [80 + (index * 93) % 500, 200]; });
+      const lines = graph.edges.filter(edge => edge.relation !== 'dataset_gene').map(edge => { const start = positions[edge.source]; const end = positions[edge.target]; return `<line data-source="${escapeHtml(edge.source)}" data-target="${escapeHtml(edge.target)}" class="graph-edge" x1="${start[0]}" y1="${start[1]}" x2="${end[0]}" y2="${end[1]}"/><text data-edge-label="${escapeHtml(edge.source)}|${escapeHtml(edge.target)}" class="graph-edge-label" x="${(start[0] + end[0]) / 2}" y="${(start[1] + end[1]) / 2 - 4}">${escapeHtml(edge.relation.replaceAll('_', ' '))}</text>`; }).join('');
+      const geneNodes = graph.nodes.filter(node => node.type === 'gene' && node.id !== 'gene');
+      const atlas = `<rect class="gene-atlas-bg" x="12" y="165" width="676" height="124" rx="8"/><text class="graph-section-label" x="24" y="181">Gene atlas · mutation count and druggability</text>`;
+      const nodes = graph.nodes.map(node => { const point = positions[node.id]; const isAtlasGene = node.type === 'gene' && node.id !== 'gene'; const classes = `${escapeHtml(node.type)}${node.mutated ? ' mutated' : ''}${node.druggable ? ' druggable' : ''}${node.selected ? ' selected' : ''}`; const radius = node.type === 'gene' ? (node.selected ? 18 : 10) : 13; const labelOffset = isAtlasGene ? 18 : 31; const label = isAtlasGene ? `${node.label} (${node.mutation_count})` : node.label; return `<circle data-node-id="${escapeHtml(node.id)}" class="graph-node ${classes}" cx="${point[0]}" cy="${point[1]}" r="${radius}"/><text data-node-label="${escapeHtml(node.id)}" class="graph-label${isAtlasGene ? ' small' : ''}" x="${point[0]}" y="${point[1] + labelOffset}">${escapeHtml(label)}</text><title>${escapeHtml(node.label)}: ${node.mutation_count || 0} observed mutations${node.druggable ? ', druggable' : ''}</title>`; }).join('');
+      svg.innerHTML = lines + atlas + nodes;
+      let dragging = null;
+      svg.querySelectorAll('.graph-node').forEach(circle => {
+        circle.addEventListener('pointerdown', event => { dragging = circle; circle.setPointerCapture(event.pointerId); });
+        circle.addEventListener('pointermove', event => { if (!dragging) return; const point = svg.createSVGPoint(); point.x = event.clientX; point.y = event.clientY; const local = point.matrixTransform(svg.getScreenCTM().inverse()); const nodeId = dragging.dataset.nodeId; positions[nodeId] = [local.x, local.y]; dragging.setAttribute('cx', local.x); dragging.setAttribute('cy', local.y); const label = svg.querySelector(`[data-node-label="${nodeId}"]`); if (label) { label.setAttribute('x', local.x); label.setAttribute('y', local.y + 31); } svg.querySelectorAll('[data-source]').forEach(edge => { const start = positions[edge.dataset.source]; const end = positions[edge.dataset.target]; edge.setAttribute('x1', start[0]); edge.setAttribute('y1', start[1]); edge.setAttribute('x2', end[0]); edge.setAttribute('y2', end[1]); const edgeLabel = svg.querySelector(`[data-edge-label="${edge.dataset.source}|${edge.dataset.target}"]`); if (edgeLabel) { edgeLabel.setAttribute('x', (start[0] + end[0]) / 2); edgeLabel.setAttribute('y', (start[1] + end[1]) / 2 - 4); } }); });
+        circle.addEventListener('pointerup', () => { dragging = null; });
+      });
+      const chromosome = graph.nodes.find(node => node.type === 'chromosome');
+      const mutatedCount = (graph.gene_landscape || []).filter(item => item.mutated).length;
+      const druggableCount = (graph.gene_landscape || []).filter(item => item.druggable).length;
+      $('graphSummary').textContent = `Core: ${graph.matched_variants} variants for ${graph.selected_gene} · ${graph.same_chromosome_variants} on ${chromosome ? chromosome.label : 'selected chromosome'} · Atlas: ${mutatedCount} mutated genes, ${druggableCount} druggable genes`;
+      $('geneLandscape').innerHTML = `<table><thead><tr><th>Gene</th><th>Observed mutations</th><th>Mutated</th><th>Druggable</th><th>Top therapy</th></tr></thead><tbody>${(graph.gene_landscape || []).map(item => `<tr><td><strong>${escapeHtml(item.gene)}</strong></td><td>${item.mutation_count}</td><td class="${item.mutated ? 'status-yes' : 'status-no'}">${item.mutated ? 'Yes' : 'No'}</td><td class="${item.druggable ? 'status-yes' : 'status-no'}">${item.druggable ? 'Yes' : 'No'}</td><td>${escapeHtml(item.top_drug || 'Review required')}</td></tr>`).join('')}</tbody></table>`;
+    }
+    function renderKde(kde) {
+      const width = 520; const height = 230; const left = 52; const right = 16; const top = 22; const bottom = 46;
+      const min = Math.min(...kde.points); const max = Math.max(...kde.points); const maxDensity = Math.max(...kde.density, 1);
+      const x = value => left + ((value - min) / Math.max(max - min, 1)) * (width - left - right);
+      const y = value => height - bottom - (value / maxDensity) * (height - top - bottom);
+      const line = kde.points.map((point, index) => `${index ? 'L' : 'M'} ${x(point).toFixed(1)} ${y(kde.density[index]).toFixed(1)}`).join(' ');
+      const area = `${line} L ${x(max).toFixed(1)} ${height - bottom} L ${x(min).toFixed(1)} ${height - bottom} Z`;
+      const markerX = x(kde.selected_position);
+      const peakIndex = kde.density.indexOf(Math.max(...kde.density));
+      const peakPosition = kde.points[peakIndex];
+      const ticks = [0, .25, .5, .75, 1];
+      const grid = ticks.map(tick => { const value = maxDensity * tick; const yPosition = y(value); return `<line class="kde-gridline" x1="${left}" y1="${yPosition}" x2="${width - right}" y2="${yPosition}"/><text class="kde-label" x="${left - 8}" y="${yPosition + 3}" text-anchor="end">${tick.toFixed(2)}</text>`; }).join('');
+      const selectedLabelX = Math.min(Math.max(markerX + 6, left + 4), width - 112);
+      $('kdeSvg').innerHTML = `${grid}<line class="kde-axis" x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"/><line class="kde-axis" x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"/><path class="kde-area" d="${area}"/><path class="kde-line" d="${line}"/><line class="kde-marker" x1="${markerX}" y1="${top}" x2="${markerX}" y2="${height - bottom}"/><text class="kde-label strong" x="${selectedLabelX}" y="${top + 10}">searched: ${Math.round(kde.selected_position)}</text><text class="kde-label" x="${left}" y="${height - 27}" text-anchor="middle">${Math.round(min)}</text><text class="kde-label" x="${(left + width - right) / 2}" y="${height - 27}" text-anchor="middle">Transcript position</text><text class="kde-label" x="${width - right}" y="${height - 27}" text-anchor="end">${Math.round(max)}</text><text class="kde-label" x="10" y="${(top + height - bottom) / 2}" transform="rotate(-90 10 ${(top + height - bottom) / 2})" text-anchor="middle">Relative density</text><circle cx="${x(peakPosition)}" cy="${y(maxDensity)}" r="3.5" fill="#167d62"/><text class="kde-label" x="${Math.min(x(peakPosition) + 6, width - 92)}" y="${y(maxDensity) - 8}">peak: ${Math.round(peakPosition)}</text>`;
+      $('kdeSummary').textContent = `${kde.gene} · searched position ${Math.round(kde.selected_position)} · peak ${Math.round(peakPosition)} · ${kde.points.length} samples · bandwidth ${kde.bandwidth}`;
+    }
+    function formatInr(value) { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value); }
+    function renderTreatmentComparison(comparison) {
+      if (!comparison.length) { $('alternatives').innerHTML = '<span class="muted">No priced treatment options returned.</span>'; return; }
+      $('alternatives').innerHTML = `<table><thead><tr><th>Drug</th><th>Probability</th><th>Base price</th><th>GST</th><th>Total incl. tax</th><th>Difference</th></tr></thead><tbody>${comparison.map(item => `<tr><td>${item.drug}</td><td>${item.estimated_probability}</td><td>${formatInr(item.base_price_inr)}</td><td>${formatInr(item.tax_included_inr)} (${item.gst_rate})</td><td><strong>${formatInr(item.total_price_inr)}</strong></td><td>${item.price_difference_from_best_inr === 0 ? 'Best price' : `+${formatInr(item.price_difference_from_best_inr)}`}</td></tr>`).join('')}</tbody></table>`;
+    }
+    function renderResult(data) {
+      $('emptyResult').classList.add('hidden'); $('predictionResult').classList.remove('hidden');
+      $('classification').textContent = data.mutation_status || data.status || '-'; $('confidence').textContent = data.confidence || '-'; $('recommendedDrug').textContent = data.recommended_drug || 'Review required';
+      $('resultBadge').textContent = data.model ? 'Prediction complete' : '';
+      $('actionText').textContent = data.recommended_drug || 'No targeted drug recommended'; $('drugProbability').textContent = data.drug_success_probability && data.drug_success_probability !== 'N/A' ? `Estimated drug success probability: ${data.drug_success_probability}` : '';
+      $('actionDetail').textContent = data.action || data.message || data.suggested_action || '';
+      const features = data.shap_top_features || [];
+      $('featureBars').innerHTML = features.length ? features.map(item => { const width = Math.min(100, Math.max(5, Math.abs(Number(item.impact)) * 100)); return `<div class="bar-row"><span>${item.feature}: ${item.value}</span><span class="bar-track"><span class="bar-fill" style="width:${width}%"></span></span><span>${Number(item.impact).toFixed(3)}</span></div>`; }).join('') : '<span class="muted">No feature impacts returned for this result.</span>';
+      renderTreatmentComparison(data.treatment_comparison || []);
+      if (data.visualizations) { renderGraph(data.visualizations.gnn_graph); renderKde(data.visualizations.kde); $('vizBadge').textContent = `${data.visualizations.kde.gene} evidence updated`; }
+    }
+
+    $('languageSelect').onchange = () => applyLanguage($('languageSelect').value);
+    $('loginTab').onclick = () => showAuthTab('login'); $('registerTab').onclick = () => showAuthTab('register');
+    $('loginForm').onsubmit = async (event) => {
+      event.preventDefault();
+      showAuthMessage('');
+      const identifier = $('loginIdentifier').value.trim();
+      const password = $('loginPassword').value;
+      if (!identifier || !password) { showAuthMessage('Enter your email or mobile number and password.'); return; }
+      try {
+        const data = await request('/auth/login', {method:'POST', body: JSON.stringify({identifier, password})});
+        applyLanguage(currentLanguage);
+        localStorage.setItem('cdss_token', data.access_token);
+        $('authView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        await loadVariantOptions();
+        await refreshHealth();
+      } catch (error) { showAuthMessage(error.message); }
+    };
+    $('registerForm').onsubmit = async (event) => {
+      event.preventDefault();
+      showAuthMessage('');
+      const fullName = $('registerName').value.trim();
+      const emailInput = $('registerEmail');
+      const email = emailInput.value.trim();
+      const mobile = $('registerMobile').value.trim();
+      const password = $('registerPassword').value;
+      if (fullName.length < 2) { showAuthMessage('Full name must contain at least 2 characters.'); return; }
+      if (!email && !mobile) { showAuthMessage('Enter an email address or mobile number.'); return; }
+      if (email && !emailInput.validity.valid) { showAuthMessage('Enter a valid email address.'); return; }
+      if (password.length < 6) { showAuthMessage('Password must contain at least 6 characters.'); return; }
+      try {
+        const data = await request('/auth/register', {method:'POST', body: JSON.stringify({full_name: fullName, email: email || null, mobile: mobile || null, password, role: $('registerRole').value, language: currentLanguage})});
+        localStorage.setItem('cdss_token', data.access_token);
+        $('authView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        await loadVariantOptions();
+        await refreshHealth();
+      } catch (error) { showAuthMessage(error.message); }
+    };
+    $('logoutButton').onclick = () => { localStorage.removeItem('cdss_token'); $('appView').classList.add('hidden'); $('authView').classList.remove('hidden'); showAuthTab('login'); };
+    $('loadOptions').onclick = loadVariantOptions; $('refreshHealth').onclick = refreshHealth;
+    $('predictForm').onsubmit = async (event) => { event.preventDefault(); showPredictMessage(''); try { const data = await request('/predict', {method:'POST', body: JSON.stringify({age: Number($('age').value), gene: $('gene').value, chromosome: $('chromosome').value, exon: Number($('exon').value), position: $('position').value})}); renderResult(data); } catch (error) { showPredictMessage(error.message); } };
+    applyLanguage(currentLanguage); refreshHealth();
+  </script>
+</body>
+</html>

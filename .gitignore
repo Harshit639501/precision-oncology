@@ -1,0 +1,6 @@
+backend/users.json
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env

@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic[email]
+joblib
+pandas
+openpyxl
+numpy
+scikit-learn
+xgboost
