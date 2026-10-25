@@ -41,3 +41,14 @@ From the project root, run:
 ```powershell
 py -3 prepare_models.py
 ```
+
+## Deploy to Vercel
+
+Import this GitHub repository as a Vercel project and deploy it with the default
+project settings. The FastAPI app serves the frontend and API from the same
+deployment.
+
+The hosted site runs in public demo mode: sign-in and account creation are
+disabled, and no user accounts are stored. It uses synthetic demonstration data
+and is not medical advice or a medical device. Do not submit real patient,
+identifying, or health information.

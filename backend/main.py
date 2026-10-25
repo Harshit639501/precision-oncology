@@ -3,7 +3,7 @@
 Entry point: py -3 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 """
 from __future__ import annotations
-import re, time, uuid, secrets, hashlib, json, logging
+import os, re, time, uuid, secrets, hashlib, json, logging
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
@@ -11,7 +11,7 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, EmailStr, Field
 
 # ───────────────────────────────────────────────────────────────────
@@ -80,6 +80,9 @@ USERS_BY_EMAIL: Dict[str, str] = {}
 USERS_BY_MOBILE: Dict[str, str] = {}
 
 def load_users() -> None:
+    if os.getenv("VERCEL") == "1":
+        LOG.info("Skipping local user accounts in the public demo")
+        return
     if not USERS_FILE.exists():
         return
     try:
@@ -141,6 +144,8 @@ def _startup():
 # ───────────────────────────────────────────────────────────────────
 @app.get("/")
 def root():
+    if os.getenv("VERCEL") == "1":
+        return FileResponse(BACKEND_DIR.parent / "index.html")
     return {"message":"SIH 2026 AI Pipeline for Precision Oncology is Running!"}
 
 # ───────────────────────────────────────────────────────────────────
@@ -193,6 +198,9 @@ class LoginIn(BaseModel):
 # ───────────────────────────────────────────────────────────────────
 @app.post("/auth/register")
 def register(payload: RegisterIn):
+    if os.getenv("VERCEL") == "1":
+        raise HTTPException(status.HTTP_410_GONE,
+                            "Accounts are disabled in the public demo.")
     full_name = payload.full_name.strip()
     email = _normalize_email(payload.email)
     mobile = _normalize_mobile(payload.mobile)
@@ -227,6 +235,9 @@ def register(payload: RegisterIn):
 # ───────────────────────────────────────────────────────────────────
 @app.post("/auth/login")
 def login(payload: LoginIn):
+    if os.getenv("VERCEL") == "1":
+        raise HTTPException(status.HTTP_410_GONE,
+                            "Accounts are disabled in the public demo.")
     ident_raw = payload.identifier.strip()
     ident = ident_raw.lower() if "@" in ident_raw else _normalize_mobile(ident_raw)
     if not ident:
